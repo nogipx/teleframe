@@ -16,9 +16,9 @@ class UserAnalytics {
     Map<String, int>? counters,
     Map<String, bool>? flags,
     List<String>? visitedRoutes,
-  })  : counters = counters ?? const {},
-        flags = flags ?? const {},
-        visitedRoutes = visitedRoutes ?? const [];
+  }) : counters = counters ?? const {},
+       flags = flags ?? const {},
+       visitedRoutes = visitedRoutes ?? const [];
 
   /// Получить значение счётчика (0 если не установлен)
   int getCount(String event) => counters[event] ?? 0;

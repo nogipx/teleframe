@@ -26,7 +26,7 @@ Future<void> setupDependencies(
   // Создание HTTP клиента с правильными timeout
   // receiveTimeout должен быть больше чем long polling timeout (30s) + запас!
   final httpClient = DioHttpClient(
-    timeout: Duration(seconds: 40),        // Connection timeout
+    timeout: Duration(seconds: 40), // Connection timeout
     receiveTimeout: Duration(seconds: 60), // Long polling (30s) + запас (30s)
   );
 

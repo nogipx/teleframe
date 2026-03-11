@@ -16,8 +16,7 @@ class AdminGuard {
   final Set<String> _adminUsernames;
 
   AdminGuard({required List<String> adminUsernames})
-      : _adminUsernames =
-            adminUsernames.map((u) => u.toLowerCase()).toSet();
+    : _adminUsernames = adminUsernames.map((u) => u.toLowerCase()).toSet();
 
   /// Проверить, является ли пользователь из данного контекста администратором
   bool isAdmin(NavigationContext context) {

@@ -125,7 +125,10 @@ class StaticAssets {
   /// Копировать файл в статическую директорию
   ///
   /// Пример: `StaticAssets.copyToImages('/tmp/photo.png', 'product.png')`
-  static Future<String> copyToImages(String sourcePath, String targetName) async {
+  static Future<String> copyToImages(
+    String sourcePath,
+    String targetName,
+  ) async {
     await initialize();
     final sourceFile = File(sourcePath);
     final targetPath = image(targetName);
@@ -174,7 +177,9 @@ class StaticAssets {
       if (info['images_count'] > 0) {
         for (final img in info['images']) {
           final size = getFileSize(image(img as String));
-          final sizeStr = size != null ? '(${(size / 1024).toStringAsFixed(1)} KB)' : '';
+          final sizeStr = size != null
+              ? '(${(size / 1024).toStringAsFixed(1)} KB)'
+              : '';
           log('    - $img $sizeStr');
         }
       }

@@ -13,7 +13,7 @@ class SembastAnalyticsRepository implements AnalyticsRepository {
   late final StoreRef<int, Map<String, dynamic>> _store;
 
   SembastAnalyticsRepository({required AnalyticsDatasource datasource})
-      : _datasource = datasource {
+    : _datasource = datasource {
     _store = intMapStoreFactory.store('user_analytics');
   }
 
@@ -109,11 +109,13 @@ class SembastAnalyticsRepository implements AnalyticsRepository {
   Map<String, dynamic> _mutableCopy(Map<String, dynamic>? raw) =>
       raw != null ? Map<String, dynamic>.from(raw) : {};
 
-  Map<String, int> _counters(Map raw) => (raw['counters'] as Map? ?? {})
-      .map((k, v) => MapEntry(k as String, (v as num).toInt()));
+  Map<String, int> _counters(Map raw) => (raw['counters'] as Map? ?? {}).map(
+    (k, v) => MapEntry(k as String, (v as num).toInt()),
+  );
 
-  Map<String, bool> _flags(Map raw) => (raw['flags'] as Map? ?? {})
-      .map((k, v) => MapEntry(k as String, v as bool));
+  Map<String, bool> _flags(Map raw) => (raw['flags'] as Map? ?? {}).map(
+    (k, v) => MapEntry(k as String, v as bool),
+  );
 
   List<String> _visitedRoutes(Map raw) =>
       (raw['visitedRoutes'] as List? ?? []).map((e) => e as String).toList();

@@ -11,9 +11,9 @@ class CopyButton extends KeyboardButton {
     required super.text,
     required this.textToCopy,
   }) : super(
-          callbackData: 'copy:${textToCopy.hashCode}',
-          action: const EmptyAction(),
-        );
+         callbackData: 'copy:${textToCopy.hashCode}',
+         action: const EmptyAction(),
+       );
 
   /// Создать кнопку для копирования
   ///

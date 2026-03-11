@@ -8,7 +8,6 @@ abstract interface class AnalyticsRepository {
   /// Аналитика всех пользователей (для детального просмотра)
   Future<List<UserAnalytics>> getAllUsers();
 
-
   // ── Счётчики ──────────────────────────────────
 
   Future<void> increment(int userId, String event, {int by = 1});

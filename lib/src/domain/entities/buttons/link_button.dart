@@ -10,9 +10,9 @@ class LinkButton extends KeyboardButton {
     required super.text,
     required this.targetUrl,
   }) : super(
-          callbackData: 'link:${Uri.parse(targetUrl).host}',
-          action: const EmptyAction(),
-        );
+         callbackData: 'link:${Uri.parse(targetUrl).host}',
+         action: const EmptyAction(),
+       );
 
   /// Создать кнопку со ссылкой
   factory LinkButton({

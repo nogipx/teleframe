@@ -1,7 +1,11 @@
 name: teleframe
-description: A universal Telegram bot framework with screen-based navigation.
+description: Telegram bot framework with screen-based navigation.
 version: 1.0.0
-publish_to: none
+
+topics:
+  - telegram
+  - bot
+  - framework
 
 environment:
   sdk: ^3.11.0

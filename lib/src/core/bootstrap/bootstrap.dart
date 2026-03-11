@@ -14,8 +14,7 @@ class _DaemonEnv {
   static const pidFile = 'TELEFRAME_PID_FILE';
   static const logFile = 'TELEFRAME_LOG_FILE';
 
-  static bool isDaemonProcess() =>
-      Platform.environment[daemonFlag] == 'true';
+  static bool isDaemonProcess() => Platform.environment[daemonFlag] == 'true';
 }
 
 /// Запустить Telegram бота с поддержкой daemon режима.
@@ -108,14 +107,26 @@ Future<void> _run({
     if (restartMode) {
       await _stopDaemon(pidFilePath, verbose);
       await Future.delayed(Duration(seconds: 1));
-      await _launchDaemon(appName, arguments, verbose, pidFilePath, logFilePath);
+      await _launchDaemon(
+        appName,
+        arguments,
+        verbose,
+        pidFilePath,
+        logFilePath,
+      );
       return;
     }
 
     if (daemonMode) {
       await _stopDaemon(pidFilePath, verbose, silent: true);
       await Future.delayed(Duration(seconds: 1));
-      await _launchDaemon(appName, arguments, verbose, pidFilePath, logFilePath);
+      await _launchDaemon(
+        appName,
+        arguments,
+        verbose,
+        pidFilePath,
+        logFilePath,
+      );
       return;
     }
 
@@ -180,9 +191,17 @@ ArgParser _buildParser(
       help: 'Токен Telegram бота.',
       mandatory: true,
     )
-    ..addFlag('daemon', negatable: false, help: 'Запустить как фоновый процесс.')
+    ..addFlag(
+      'daemon',
+      negatable: false,
+      help: 'Запустить как фоновый процесс.',
+    )
     ..addFlag('stop', negatable: false, help: 'Остановить фоновый процесс.')
-    ..addFlag('restart', negatable: false, help: 'Перезапустить фоновый процесс.');
+    ..addFlag(
+      'restart',
+      negatable: false,
+      help: 'Перезапустить фоновый процесс.',
+    );
 
   for (final configure in extraArgs) {
     configure(parser);

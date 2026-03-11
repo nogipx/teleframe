@@ -13,7 +13,7 @@ class SembastSessionRepository implements SessionRepository {
   late final StoreRef<int, Map<String, dynamic>> _store;
 
   SembastSessionRepository({required SembastDatasource datasource})
-      : _datasource = datasource {
+    : _datasource = datasource {
     _store = intMapStoreFactory.store('sessions');
   }
 
@@ -67,12 +67,16 @@ class SembastSessionRepository implements SessionRepository {
       'chatId': context.chatId,
       'navigationStack': context.navigationStack,
       'data': context.data,
-      'lastMessages': context.lastMessages.map((msg) => {
-        'messageId': msg.messageId,
-        'type': msg.type.name,
-        'content': msg.content,
-        'additionalMessageIds': msg.additionalMessageIds,
-      }).toList(),
+      'lastMessages': context.lastMessages
+          .map(
+            (msg) => {
+              'messageId': msg.messageId,
+              'type': msg.type.name,
+              'content': msg.content,
+              'additionalMessageIds': msg.additionalMessageIds,
+            },
+          )
+          .toList(),
     };
   }
 
@@ -81,28 +85,30 @@ class SembastSessionRepository implements SessionRepository {
     return NavigationContext(
       userId: data['userId'] as int,
       chatId: data['chatId'] as int,
-      navigationStack: (data['navigationStack'] as List<dynamic>?)
+      navigationStack:
+          (data['navigationStack'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],
-      data: (data['data'] as Map<dynamic, dynamic>?)?.map(
+      data:
+          (data['data'] as Map<dynamic, dynamic>?)?.map(
             (key, value) => MapEntry(key as String, value),
           ) ??
           {},
-      lastMessages: (data['lastMessages'] as List<dynamic>?)
-              ?.map((e) {
-                final map = e as Map<dynamic, dynamic>;
-                return SentMessage(
-                  messageId: map['messageId'] as int,
-                  type: MessageType.values.byName(map['type'] as String),
-                  content: map['content'] as String?,
-                  additionalMessageIds: (map['additionalMessageIds'] as List<dynamic>?)
-                          ?.map((id) => id as int)
-                          .toList() ??
-                      [],
-                );
-              })
-              .toList() ??
+      lastMessages:
+          (data['lastMessages'] as List<dynamic>?)?.map((e) {
+            final map = e as Map<dynamic, dynamic>;
+            return SentMessage(
+              messageId: map['messageId'] as int,
+              type: MessageType.values.byName(map['type'] as String),
+              content: map['content'] as String?,
+              additionalMessageIds:
+                  (map['additionalMessageIds'] as List<dynamic>?)
+                      ?.map((id) => id as int)
+                      .toList() ??
+                  [],
+            );
+          }).toList() ??
           [],
     );
   }

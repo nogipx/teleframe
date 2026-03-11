@@ -15,7 +15,7 @@ class AnalyticsService {
   final AnalyticsRepository _repository;
 
   AnalyticsService({required AnalyticsRepository repository})
-      : _repository = repository;
+    : _repository = repository;
 
   Future<UserAnalytics> getAll(int userId) => _repository.getAll(userId);
 

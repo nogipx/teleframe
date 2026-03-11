@@ -1,11 +1,16 @@
-# https://dart.dev/guides/libraries/private-files
-# Created by `dart pub`
 .dart_tool/
-
-# FVM Version Cache
 .fvm/
-.idea/
-.artifacts/
-bin/.belyash_static/
-bin/.belyash_store_data/
+
 build/
+pubspec.lock
+**/examples
+
+coverage/
+.chats/
+
+*.bin
+*.pem
+.vscode/
+.idea/
+.docs/
+*.json

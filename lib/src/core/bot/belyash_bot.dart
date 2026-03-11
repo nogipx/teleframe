@@ -82,7 +82,10 @@ class TeleframeBot {
 
       // Инициализация зависимостей
       log('🔧 Setting up dependencies...');
-      await setupDependencies(config.token, adminUsernames: config.adminUsernames);
+      await setupDependencies(
+        config.token,
+        adminUsernames: config.adminUsernames,
+      );
 
       // Получение зависимостей
       _bot = getIt<Bot>();
@@ -217,7 +220,7 @@ class TeleframeBot {
   void _setupWatchdog() {
     _watchdog = BotWatchdog(
       inactivityThreshold: Duration(minutes: 5), // Порог неактивности
-      checkInterval: Duration(minutes: 1),       // Частота проверки
+      checkInterval: Duration(minutes: 1), // Частота проверки
       onInactivity: () async {
         log('🔄 Restarting bot due to inactivity...');
         try {
