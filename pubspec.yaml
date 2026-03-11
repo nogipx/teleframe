@@ -1,0 +1,26 @@
+name: teleframe
+description: A universal Telegram bot framework with screen-based navigation.
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  televerse: ^3.3.0
+  get_it: ^9.2.1
+  sembast: ^3.8.6
+  path: ^1.9.1
+  crypto: ^3.0.7
+  http: ^1.6.0
+  args: ^2.7.0
+
+  daemon_launcher:
+    git:
+      url: https://github.com/nogipx/rpc_dart
+      path: others/daemon_launcher
+      ref: 0dbb2ffdfd8bbd2c93b385cf312e4b7482af4852
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.30.0
