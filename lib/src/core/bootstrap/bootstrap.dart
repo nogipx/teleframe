@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:daemon_launcher/daemon_launcher.dart';
 import 'package:path/path.dart' as p;
 
 import '../bot/belyash_bot.dart';
+import '../daemon/daemon.dart';
 import '../logging/logger.dart';
 
 /// Переменные окружения для daemon режима
