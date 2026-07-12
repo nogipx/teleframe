@@ -1,6 +1,13 @@
-import '../logging/logger.dart';
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:get_it/get_it.dart';
-import 'package:televerse/televerse.dart';
+// televerse exports its own `HttpClient` interface (implemented by
+// DioHttpClient); hide it so `HttpClient` refers to dart:io's.
+import 'package:televerse/televerse.dart' hide HttpClient;
+
+import '../logging/logger.dart';
 
 import '../../data/datasources/analytics_datasource.dart';
 import '../../data/datasources/sembast_datasource.dart';
@@ -23,12 +30,12 @@ Future<void> setupDependencies(
   String botToken, {
   List<String> adminUsernames = const [],
 }) async {
-  // Создание HTTP клиента с правильными timeout
+  // Создание HTTP клиента с правильными timeout.
   // receiveTimeout должен быть больше чем long polling timeout (30s) + запас!
-  final httpClient = DioHttpClient(
-    timeout: Duration(seconds: 40), // Connection timeout
-    receiveTimeout: Duration(seconds: 60), // Long polling (30s) + запас (30s)
-  );
+  // TELEGRAM_PROXY (host:port или http://[user:pass@]host:port) маршрутизирует
+  // весь трафик к api.telegram.org через HTTP CONNECT-прокси — нужно там, где
+  // Telegram недоступен напрямую (например из РФ-инфраструктуры).
+  final httpClient = _buildHttpClient(Platform.environment['TELEGRAM_PROXY']);
 
   // Создание экземпляра Televerse Bot
   // LongPollingFetcher будет создан автоматически при bot.start()
@@ -89,4 +96,58 @@ Future<void> setupDependencies(
       analyticsService: getIt<AnalyticsService>(),
     ),
   );
+}
+
+/// Builds the televerse HTTP client, optionally routing all Telegram API
+/// traffic through an HTTP CONNECT proxy given by [proxy] (`host:port` or
+/// `http://[user:pass@]host:port`). Needed where api.telegram.org is not
+/// directly reachable (e.g. Russian infrastructure).
+DioHttpClient _buildHttpClient(String? proxy) {
+  const connectTimeout = Duration(seconds: 40);
+  const receiveTimeout = Duration(seconds: 60);
+
+  final value = proxy?.trim() ?? '';
+  if (value.isEmpty) {
+    return DioHttpClient(
+      timeout: connectTimeout,
+      receiveTimeout: receiveTimeout,
+    );
+  }
+
+  final uri =
+      value.contains('://') ? Uri.parse(value) : Uri.parse('http://$value');
+  final hostPort = '${uri.host}:${uri.port}';
+  final creds = uri.userInfo.isNotEmpty ? uri.userInfo.split(':') : const [];
+
+  // Mirror televerse's default BaseOptions so the Bot API keeps working;
+  // only the proxy adapter is added on top.
+  final dio = Dio(
+    BaseOptions(
+      connectTimeout: connectTimeout,
+      receiveTimeout: receiveTimeout,
+      sendTimeout: connectTimeout,
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Televerse/1.0',
+      },
+      validateStatus: (status) => status != null && status < 500,
+    ),
+  );
+  dio.httpClientAdapter = IOHttpClientAdapter(
+    createHttpClient: () {
+      final client = HttpClient();
+      client.findProxy = (_) => 'PROXY $hostPort';
+      if (creds.length == 2) {
+        client.addProxyCredentials(
+          uri.host,
+          uri.port,
+          '',
+          HttpClientBasicCredentials(creds[0], creds[1]),
+        );
+      }
+      return client;
+    },
+  );
+  log('🌐 Routing Telegram API through proxy $hostPort');
+  return DioHttpClient(dio: dio);
 }

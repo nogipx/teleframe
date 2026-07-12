@@ -18,6 +18,9 @@ dependencies:
   crypto: ^3.0.7
   http: ^1.6.0
   args: ^2.7.0
+  # Used directly to configure an HTTP proxy for the Telegram API client
+  # (televerse's transport is Dio-based). See service_locator.dart.
+  dio: ^5.9.1
 
 dev_dependencies:
   lints: ^6.1.0
