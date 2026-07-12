@@ -122,6 +122,34 @@ class TeleverseBotRepository implements BotRepository {
     }
   }
 
+  @override
+  Future<SentMessage> sendVideo({
+    required int chatId,
+    required String video,
+    String? caption,
+    List<List<KeyboardButton>>? keyboard,
+    ParseMode parseMode = ParseMode.none,
+  }) async {
+    final replyMarkup =
+        keyboard != null ? _buildInlineKeyboard(keyboard) : null;
+    // A bare source with an http(s) scheme is a URL Telegram fetches
+    // itself; otherwise it's a file_id belonging to this bot.
+    final isUrl = video.startsWith('http://') || video.startsWith('https://');
+    final inputFile =
+        isUrl ? InputFile.fromUrl(video) : InputFile.fromFileId(video);
+    final message = await bot.api.sendVideo(
+      ChatID(chatId),
+      inputFile,
+      caption: caption,
+      replyMarkup: replyMarkup,
+      parseMode: _parseModeToTelegram(parseMode),
+    );
+    return SentMessage.video(
+      messageId: message.messageId,
+      videoSource: video,
+    );
+  }
+
   /// Отправить с объединенным сообщением (sendPhoto с caption)
   Future<List<SentMessage>> _sendWithCombinedMessage(
     ChatID chatId,

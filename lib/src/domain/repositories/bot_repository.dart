@@ -37,6 +37,19 @@ abstract class BotRepository {
     ImageSendStrategy imageSendStrategy = ImageSendStrategy.auto,
   });
 
+  /// Отправить видео-сообщение.
+  ///
+  /// [video] — URL (Telegram скачает сам) или Telegram file_id (должен
+  /// принадлежать этому боту). [caption] — подпись, [keyboard] — inline
+  /// клавиатура. Возвращает структуру отправленного сообщения.
+  Future<SentMessage> sendVideo({
+    required int chatId,
+    required String video,
+    String? caption,
+    List<List<KeyboardButton>>? keyboard,
+    ParseMode parseMode = ParseMode.none,
+  });
+
   /// Редактировать существующее сообщение
   ///
   /// keyboard - список строк кнопок. Каждый вложенный список = одна строка кнопок.

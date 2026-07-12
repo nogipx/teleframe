@@ -57,6 +57,15 @@ abstract class ScreenState {
   /// - Telegram File ID: `AgACAgIAAxkBAAI...` (начинается с букв, без слешей)
   Future<List<String>> getImages(NavigationContext context) async => const [];
 
+  /// Одно видео для экрана: URL или Telegram file_id, либо `null`.
+  ///
+  /// Если задано, экран рендерится как видео-сообщение: caption берётся из
+  /// [getMessage], клавиатура — из [getButtons]. Отправляется свежим
+  /// сообщением (без in-place редактирования). Аналог [getImages], но для
+  /// одного видео. URL Telegram скачивает сам; file_id должен принадлежать
+  /// этому боту.
+  Future<String?> getVideo(NavigationContext context) async => null;
+
   /// Получить список кнопок для inline-клавиатуры
   ///
   /// Возвращает список строк кнопок. Каждый вложенный список - это одна строка.

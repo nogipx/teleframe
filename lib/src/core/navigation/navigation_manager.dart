@@ -807,6 +807,27 @@ class NavigationManager {
   }) async {
     final lastMessages = context.lastMessages;
 
+    // Видео-экран: рендерим как свежее видео-сообщение (удаляем прошлые
+    // сообщения + sendVideo с caption и клавиатурой). Без in-place
+    // редактирования — video отправляется заново при каждом входе.
+    final video = await screen.getVideo(context);
+    if (video != null && video.isNotEmpty) {
+      if (lastMessages.isNotEmpty) {
+        await _botRepository.deleteMessages(
+          chatId: chatId,
+          messageIds: lastMessages.expand((m) => m.allMessageIds).toList(),
+        );
+      }
+      final sent = await _botRepository.sendVideo(
+        chatId: chatId,
+        video: video,
+        caption: message,
+        keyboard: buttons.isNotEmpty ? buttons : null,
+        parseMode: screen.parseMode,
+      );
+      return [sent];
+    }
+
     // Фильтруем пустые URL из images (важно для правильного определения структуры!)
     final validImages = images.where((url) => url.isNotEmpty).toList();
 

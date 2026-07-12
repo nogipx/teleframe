@@ -8,6 +8,9 @@ enum MessageType {
 
   /// Медиа-группа (несколько фото)
   mediaGroup,
+
+  /// Одно видео
+  video,
 }
 
 /// Информация об отправленном сообщении
@@ -57,6 +60,18 @@ class SentMessage {
       messageId: messageId,
       type: MessageType.photo,
       content: imageUrl,
+    );
+  }
+
+  /// Создать видео-сообщение (content = URL или Telegram file_id).
+  factory SentMessage.video({
+    required int messageId,
+    required String videoSource,
+  }) {
+    return SentMessage(
+      messageId: messageId,
+      type: MessageType.video,
+      content: videoSource,
     );
   }
 
