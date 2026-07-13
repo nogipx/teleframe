@@ -249,6 +249,11 @@ Future<void> _handleCustomAction(
           log('✓ CustomAction executed (no action)');
 
         case NavigateResult(:final routeId, :final params):
+          // Сохранить изменённый контекст перед навигацией: navigateTo
+          // перечитывает контекст из хранилища, поэтому несохранённые
+          // изменения из обработчика (например, sign-out, очистивший сессию)
+          // иначе потеряются.
+          await sessionRepository.saveContext(userId, context);
           // Навигация на указанный маршрут с параметрами
           await navManager.navigateTo(
             userId: userId,
