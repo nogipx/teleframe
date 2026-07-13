@@ -196,6 +196,18 @@ class TeleframeBot {
       context.setData('userName', userName);
       final username = ctx.from?.username;
       if (username != null) context.setData('_username', username);
+
+      // Deep-link payload: `/start <payload>` (e.g. t.me/bot?start=login_CODE).
+      // Exposed to the start screen via context so it can act on it (browser
+      // auth handoff, referral codes, etc). Cleared when absent so a stale
+      // payload from a previous /start can't be replayed.
+      final startPayload = ctx.args.isNotEmpty ? ctx.args.first : null;
+      if (startPayload != null && startPayload.isNotEmpty) {
+        context.setData('startPayload', startPayload);
+      } else {
+        context.removeData('startPayload');
+      }
+
       await _sessionRepository.saveContext(userId, context);
 
       // Перейти на стартовый экран
