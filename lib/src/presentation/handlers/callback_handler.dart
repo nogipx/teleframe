@@ -276,34 +276,46 @@ Future<void> _handleCustomAction(
           );
           log('✓ CustomAction executed and screen refreshed (explicit)');
 
-        case MessageResult(:final text, :final images, :final links):
-          // Создать клавиатуру со ссылками (если есть)
-          List<List<KeyboardButton>>? keyboard;
-          if (links.isNotEmpty) {
-            keyboard = links.map((link) {
-              return [
-                LinkButton(
-                  text: link.text,
-                  url: link.url,
-                ),
-              ];
-            }).toList();
+        case MessageResult(
+            :final text,
+            :final images,
+            :final links,
+            :final reanchorMenu,
+          ):
+          if (reanchorMenu) {
+            // Move the interactive menu ONTO this new message: send the answer
+            // carrying the current screen's keyboard, strip the keyboard off the
+            // previous anchor, re-track. Menu ends up at the bottom, no delete.
+            await navManager.reanchorViaMessage(
+              userId: userId,
+              chatId: chatId,
+              text: text,
+              images: images,
+              links: links,
+            );
+            log(
+              '✓ CustomAction executed; menu re-anchored onto new message: "$text"',
+            );
+          } else {
+            // Fire-and-forget info message (not tracked, stays in the chat).
+            List<List<KeyboardButton>>? keyboard;
+            if (links.isNotEmpty) {
+              keyboard = links
+                  .map((link) => [LinkButton(text: link.text, url: link.url)])
+                  .toList();
+            }
+            await botRepository.sendMessage(
+              chatId: chatId,
+              text: text,
+              images: images,
+              keyboard: keyboard,
+            );
+            // НЕ сохраняем messageIds - сообщение остаётся в чате
+            await sessionRepository.saveContext(userId, context);
+            log(
+              '✓ CustomAction executed and info message sent: "$text" (${images.length} images, ${links.length} links)',
+            );
           }
-
-          // Отправить информационное сообщение (НЕ трекается!)
-          await botRepository.sendMessage(
-            chatId: chatId,
-            text: text,
-            images: images,
-            keyboard: keyboard,
-          );
-
-          // НЕ сохраняем messageIds - сообщение остаётся в чате
-          // Сохранить контекст (без изменений в messageIds)
-          await sessionRepository.saveContext(userId, context);
-          log(
-            '✓ CustomAction executed and info message sent: "$text" (${images.length} images, ${links.length} links)',
-          );
 
         case AlertResult(:final text):
           // Показать всплывающее уведомление (alert)

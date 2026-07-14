@@ -18,11 +18,18 @@ sealed class HandlerResult {
 
   /// Отправить информационное сообщение пользователю
   ///
-  /// Сообщение не трекается системой навигации и остаётся в чате
+  /// Сообщение не трекается системой навигации и остаётся в чате.
+  ///
+  /// Если [reanchorMenu] == true, после отправки текущий экран
+  /// пере-отправляется вниз (старое сообщение экрана удаляется и шлётся
+  /// заново), чтобы интерактивное меню осталось последним сообщением, а не
+  /// «застряло» над только что отправленным. По умолчанию false — поведение
+  /// не меняется для существующих экранов.
   const factory HandlerResult.message(
     String text, {
     List<String> images,
     List<MessageLink> links,
+    bool reanchorMenu,
   }) = MessageResult;
 
   /// Показать всплывающее уведомление (alert)
@@ -55,10 +62,15 @@ class MessageResult extends HandlerResult {
   final List<String> images;
   final List<MessageLink> links;
 
+  /// Re-anchor the current screen below this message after sending it, so the
+  /// interactive menu stays the last message. See [HandlerResult.message].
+  final bool reanchorMenu;
+
   const MessageResult(
     this.text, {
     this.images = const [],
     this.links = const [],
+    this.reanchorMenu = false,
   });
 }
 

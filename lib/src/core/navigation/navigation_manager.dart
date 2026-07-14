@@ -519,6 +519,64 @@ class NavigationManager {
     await _sessionRepository.saveContext(userId, context);
   }
 
+  /// Re-anchor the interactive menu to the bottom by MOVING the keyboard,
+  /// not by deleting/recreating messages (no flicker, no delete-48h limit):
+  ///   1. send [text] as a new message carrying the CURRENT screen's keyboard,
+  ///   2. strip the keyboard from the previous anchor(s),
+  ///   3. re-track the new message as the screen anchor.
+  /// The old message stays in the chat as plain text above.
+  Future<void> reanchorViaMessage({
+    required int userId,
+    required int chatId,
+    required String text,
+    List<String> images = const [],
+    List<MessageLink> links = const [],
+  }) async {
+    final context = await _sessionRepository.getContext(userId);
+
+    // The current screen's buttons ride along on the new message, so the live
+    // menu ends up at the bottom of the chat.
+    var keyboard = <List<KeyboardButton>>[];
+    if (context.currentRoute != null) {
+      final screen = _routeRegistry.createScreen(context.currentRoute!, context);
+      keyboard = await screen.getButtons(context);
+    }
+    // Extra link rows, if the handler supplied any.
+    for (final link in links) {
+      keyboard = [
+        ...keyboard,
+        [LinkButton(text: link.text, url: link.url)],
+      ];
+    }
+
+    // Send the new anchor FIRST — if the strip below fails, there is still a
+    // live keyboard at the bottom.
+    final sent = await _botRepository.sendMessage(
+      chatId: chatId,
+      text: text,
+      images: images.where((img) => img.isNotEmpty).toList(),
+      keyboard: keyboard.isNotEmpty ? keyboard : null,
+    );
+
+    // Strip the keyboard from the previous anchor(s) so only the new message
+    // carries the live menu.
+    for (final msg in context.lastMessages) {
+      try {
+        await _botRepository.removeKeyboard(
+          chatId: chatId,
+          messageId: msg.messageId,
+        );
+      } catch (e) {
+        log('Warning: failed to strip keyboard from ${msg.messageId}: $e');
+      }
+    }
+
+    // The new message is now the screen anchor.
+    context.lastMessages = sent;
+    await _sessionRepository.saveContext(userId, context);
+    log('✓ Menu re-anchored via keyboard move (no delete)');
+  }
+
   /// Вспомогательный метод: обновление через editMessageMedia (без анимации удаления)
   Future<void> _refreshViaEditMedia(
     NavigationContext context,
