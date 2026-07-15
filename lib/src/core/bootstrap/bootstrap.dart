@@ -57,9 +57,14 @@ Future<void> bootstrapBot({
       dataDirName: dataDirName,
     ),
     (error, stackTrace) {
-      log('❌ Uncaught error in main zone: $error');
+      // Log but DO NOT exit. A stray uncaught async error — e.g. a background
+      // token refresh rejecting, or one user's transient API failure — must not
+      // kill the bot for everyone and send it into a systemd restart loop. The
+      // polling loop keeps running in this zone; per-callback errors are already
+      // caught in the callback handler. Fatal startup failures exit via _run's
+      // own exit() calls before we ever get here.
+      log('❌ Uncaught error in main zone (ignored, bot keeps running): $error');
       log('Stack trace: $stackTrace');
-      exit(1);
     },
   );
 }
