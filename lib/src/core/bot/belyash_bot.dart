@@ -44,6 +44,12 @@ class BotConfig {
   /// Пример: `['john_doe', 'alice_admin']`
   final List<String> adminUsernames;
 
+  /// When true, an admin (see [adminUsernames]) who sends the bot any media —
+  /// video, animation/GIF, document, audio or photo — gets a reply with that
+  /// file's Telegram `file_id`. Handy for wiring media into screens without
+  /// external tools. Non-admins get no response. Default false.
+  final bool echoMediaFileIdsToAdmins;
+
   const BotConfig({
     required this.token,
     required this.startRoute,
@@ -53,6 +59,7 @@ class BotConfig {
     this.verbose = false,
     this.homeRoute,
     this.adminUsernames = const [],
+    this.echoMediaFileIdsToAdmins = false,
   });
 }
 
@@ -226,6 +233,37 @@ class TeleframeBot {
       routeRegistry: _routeRegistry,
       sessionRepository: _sessionRepository,
     );
+
+    // Admin-only file_id echo: an admin (adminUsernames) who sends the bot any
+    // media gets its Telegram file_id back — for wiring media into screens
+    // without external tools. Non-admins get no response.
+    if (config.echoMediaFileIdsToAdmins) {
+      final admins = config.adminUsernames.map((u) => u.toLowerCase()).toSet();
+      Future<void> echo(Context ctx) async {
+        final username = ctx.from?.username?.toLowerCase();
+        if (username == null || !admins.contains(username)) return;
+        final m = ctx.msg;
+        if (m == null) return;
+        final lines = <String>[];
+        if (m.video != null) lines.add('video: ${m.video!.fileId}');
+        if (m.animation != null) lines.add('animation: ${m.animation!.fileId}');
+        if (m.document != null) lines.add('document: ${m.document!.fileId}');
+        if (m.audio != null) lines.add('audio: ${m.audio!.fileId}');
+        final photo = m.photo;
+        if (photo != null && photo.isNotEmpty) {
+          lines.add('photo: ${photo.last.fileId}');
+        }
+        if (lines.isEmpty) return;
+        await ctx.reply('file_id:\n${lines.join('\n')}');
+      }
+
+      _bot.onVideo(echo);
+      _bot.onAnimation(echo);
+      _bot.onDocument(echo);
+      _bot.onAudio(echo);
+      _bot.onPhoto(echo);
+      log('🆔 Admin file_id echo enabled');
+    }
   }
 
   /// Настроить watchdog для мониторинга активности бота
